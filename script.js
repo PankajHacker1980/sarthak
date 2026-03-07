@@ -1,73 +1,79 @@
 // =============================
-// MAP INITIALIZATION
-// Flood-prone region near Chambal River (Kota)
+// MAP LOCATION
+// Flood prone jungle area near Ranthambore
 // =============================
 
-var base = [25.2138, 75.8648];
+var base = [26.0173, 76.5026];
 
 var map = L.map('map').setView(base, 13);
 
 L.tileLayer(
 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-{ maxZoom: 19 }
+{ maxZoom:19 }
 ).addTo(map);
 
 
 // =============================
-// LARGE ICONS
+// LARGE CLEAR ICONS
 // =============================
 
 var droneIcon = L.divIcon({
-html:"✈️",
+html:"🛩️",
 className:"",
-iconSize:[50,50]
+iconSize:[70,70]
 });
 
 var humanIcon = L.divIcon({
 html:"🧍‍♂️",
 className:"",
-iconSize:[55,55]
+iconSize:[80,80]
 });
 
 var houseIcon = L.divIcon({
-html:"🏠",
+html:"🏚️",
 className:"",
-iconSize:[50,50]
+iconSize:[70,70]
 });
 
 var treeIcon = L.divIcon({
-html:"🌳",
+html:"🌲",
 className:"",
-iconSize:[50,50]
+iconSize:[70,70]
 });
 
 
 // =============================
-// SIMULATED DETECTIONS
+// SURVIVOR LOCATIONS
 // =============================
 
 var humans = [
-[25.215,75.862],
-[25.210,75.867],
-[25.212,75.865]
+[26.018,76.498],
+[26.020,76.507],
+[26.014,76.503]
 ];
 
 var houses = [
-[25.214,75.868],
-[25.208,75.864]
+[26.019,76.505],
+[26.013,76.500]
 ];
 
 var trees = [
-[25.212,75.869]
+[26.021,76.502],
+[26.017,76.509]
 ];
+
+
+// =============================
+// CREATE MARKERS
+// =============================
 
 humans.forEach(p=>{
 let m=L.marker(p,{icon:humanIcon}).addTo(map);
 
 m.on("click",()=>{
 showPopup(
-"Human Detected",
-"Possible flood survivor detected. Rescue may be required.",
+"Survivor Detected",
+"Person stranded in flooded jungle area.",
 p,
 true
 );
@@ -79,8 +85,8 @@ let m=L.marker(p,{icon:houseIcon}).addTo(map);
 
 m.on("click",()=>{
 showPopup(
-"House Located",
-"Residential building detected. Possible occupants.",
+"Damaged Shelter",
+"Flood impacted structure detected.",
 p,
 true
 );
@@ -92,8 +98,8 @@ let m=L.marker(p,{icon:treeIcon}).addTo(map);
 
 m.on("click",()=>{
 showPopup(
-"Tree",
-"Vegetation detected. No action required.",
+"Forest Area",
+"Dense vegetation zone.",
 p,
 false
 );
@@ -106,14 +112,11 @@ false
 // =============================
 
 var drone;
-var dronePath;
 var pathLine;
+var dronePath=[];
 
-var battery = 100;
-var altitude = 40;
-
-
-// DEPLOY SCANNING DRONE
+var battery=100;
+var altitude=45;
 
 function deployDrone(){
 
@@ -126,14 +129,14 @@ dronePath=[base];
 pathLine=L.polyline(dronePath,{color:"orange"}).addTo(map);
 
 
-// Pentagon scanning route
+// Pentagon scan
 
 let route=[
 base,
-[25.217,75.861],
-[25.219,75.866],
-[25.214,75.870],
-[25.209,75.866],
+[26.022,76.498],
+[26.023,76.506],
+[26.017,76.510],
+[26.012,76.503],
 base
 ];
 
@@ -142,23 +145,22 @@ moveDroneSmooth(route);
 }
 
 
-
 // =============================
-// SMOOTH DRONE MOVEMENT
+// VERY SMOOTH DRONE MOVEMENT
 // =============================
 
 function moveDroneSmooth(route){
 
 let i=0;
 
-function moveSegment(){
+function move(){
 
 if(i>=route.length-1) return;
 
 let start=route[i];
 let end=route[i+1];
 
-let steps=120;
+let steps=150;
 
 let latStep=(end[0]-start[0])/steps;
 let lngStep=(end[1]-start[1])/steps;
@@ -188,59 +190,40 @@ clearInterval(interval);
 
 i++;
 
-moveSegment();
+move();
 
 }
 
-},180); // VERY SLOW DRONE SPEED
+},200);
 
 }
 
-moveSegment();
+move();
 
 }
-
 
 
 // =============================
-// DRONE SWARM
-// =============================
-
-function deploySwarm(){
-
-deployDrone();
-
-setTimeout(()=>{
-deployDrone();
-},4000);
-
-}
-
-
-
-// =============================
-// TELEMETRY SYSTEM
+// TELEMETRY
 // =============================
 
 function updateTelemetry(pos){
 
-battery = Math.max(0, battery - 0.03);
+battery=Math.max(0,battery-0.02);
 
-document.getElementById("battery").innerText = Math.floor(battery);
+document.getElementById("battery").innerText=Math.floor(battery);
 
-document.getElementById("altitude").innerText = altitude;
+document.getElementById("altitude").innerText=altitude;
 
-document.getElementById("speed").innerText = 5;
+document.getElementById("speed").innerText=5;
 
-document.getElementById("lat").innerText = pos[0].toFixed(5);
+document.getElementById("lat").innerText=pos[0].toFixed(5);
 
-document.getElementById("lon").innerText = pos[1].toFixed(5);
+document.getElementById("lon").innerText=pos[1].toFixed(5);
 
-document.getElementById("altitudeBar").style.width =
-(altitude/100*100)+"%";
+document.getElementById("altitudeBar").style.width=(altitude/100*100)+"%";
 
 }
-
 
 
 // =============================
@@ -252,14 +235,11 @@ var target=null;
 function showPopup(title,desc,pos,allow){
 
 document.getElementById("popupTitle").innerText=title;
-
 document.getElementById("popupDescription").innerText=desc;
 
 target=pos;
 
-let btn=document.getElementById("supplyBtn");
-
-btn.style.display = allow ? "block" : "none";
+document.getElementById("supplyBtn").style.display=allow?"block":"none";
 
 document.getElementById("infoPopup").classList.remove("hidden");
 
@@ -272,7 +252,6 @@ document.getElementById("infoPopup").classList.add("hidden");
 }
 
 
-
 // =============================
 // SUPPLY DRONE
 // =============================
@@ -283,24 +262,19 @@ if(!target) return;
 
 let supply=L.marker(base,{icon:droneIcon}).addTo(map);
 
-let route=[
-base,
-target,
-base
-];
+let route=[base,target,base];
 
-moveSupplyDrone(supply,route);
+moveDroneSmoothSupply(supply,route);
 
 closePopup();
 
 }
 
-
-function moveSupplyDrone(drone,route){
+function moveDroneSmoothSupply(drone,route){
 
 let i=0;
 
-function moveSegment(){
+function move(){
 
 if(i>=route.length-1){
 
@@ -313,7 +287,7 @@ return;
 let start=route[i];
 let end=route[i+1];
 
-let steps=90;
+let steps=120;
 
 let latStep=(end[0]-start[0])/steps;
 let lngStep=(end[1]-start[1])/steps;
@@ -335,22 +309,21 @@ clearInterval(interval);
 
 i++;
 
-moveSegment();
+move();
 
 }
 
-},170);
+},200);
 
 }
 
-moveSegment();
+move();
 
 }
-
 
 
 // =============================
-// ANNOUNCEMENT SYSTEM
+// ANNOUNCEMENT
 // =============================
 
 function sendText(){
@@ -359,14 +332,13 @@ let msg=document.getElementById("announcement").value;
 
 if(msg==="") return;
 
-alert("Emergency Broadcast: " + msg);
+alert("Emergency Broadcast: "+msg);
 
 }
 
 
-
 // =============================
-// VOICE ANNOUNCEMENT
+// VOICE RECORDING
 // =============================
 
 let recorder;
