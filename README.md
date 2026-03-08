@@ -34,7 +34,7 @@ The goal is to **reduce rescue response time from hours to minutes**.
 ---
 ## SARTHAK
 
-![SARTHAK ](Pictures/5.jpeg)
+![SARTHAK ](Pictures/7.jpeg)
 ## Dashboard Preview
 
 ![SARTHAK Dashboard](Pictures/3.jpeg)
